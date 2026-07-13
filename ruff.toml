@@ -1,0 +1,240 @@
+
+# ============================================================================
+# RUFF CONFIGURATION
+# ============================================================================
+# Ruff combines multiple linting tools: pyflakes (F), pycodestyle (E/W),
+# isort (I), pydocstyle (D), and many others. This config incorporates:
+# 1. PEP 8 import/export standards (isort rules)
+# 2. Pylint rules mapped to ruff equivalents
+# 3. Code style & naming conventions from .pylintrc
+# ============================================================================
+
+
+# Target Python version (matches .pylintrc py-version=3.12)
+target-version = "py312"
+
+# Line length (matches .pylintrc max-line-length=100)
+line-length = 100
+
+# Exclude standard directories and patterns
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".pytest_cache",
+    ".mypy_cache",
+    "node_modules",
+]
+
+# Files to ignore (matches .pylintrc ignore=CVS)
+respect-gitignore = true
+
+[lint]
+# ========================================================================
+# RULE SELECTION
+# ========================================================================
+# Ruff uses a letter-based code system for rule categories:
+# F   = Pyflakes (unused imports, undefined names)
+# E   = PEP 8 errors (indentation, whitespace)
+# W   = PEP 8 warnings (blank lines)
+# I   = isort (import ordering, PEP 8 compliance)
+# N   = pep8-naming (naming conventions: snake_case, PascalCase, etc.)
+# D   = pydocstyle (docstring conventions)
+# UP  = pyupgrade (modernize Python syntax)
+# C90 = mccabe (complexity)
+# B   = flake8-bugbear (likely bugs, design problems)
+# A   = flake8-builtins (shadowing builtins)
+# C4  = flake8-comprehensions (comprehension style)
+# SIM = flake8-simplify (code simplifications)
+# ========================================================================
+
+select = [
+    # Pyflakes: catch undefined names, unused imports, etc.
+    "F",
+    
+    # PEP 8 style: indentation, whitespace (E = error, W = warning)
+    "E",
+    "W",
+    
+    # isort: import ordering and PEP 8 compliance
+    "I",
+    
+    # pep8-naming: enforce snake_case, PascalCase, etc. (maps to .pylintrc [BASIC])
+    "N",
+    
+    # pyupgrade: modernize code for target Python version
+    "UP",
+    
+    # flake8-bugbear: catch common bugs and design problems
+    "B",
+    
+    # flake8-builtins: warn when shadowing builtins
+    "A",
+    
+    # flake8-comprehensions: improve list/dict/set comprehensions
+    "C4",
+]
+
+# Rules to ignore (mapped from .pylintrc disables section)
+ignore = [
+    # Mapped from .pylintrc [MESSAGES CONTROL] disable list:
+    
+    # Trailing whitespace: we rely on formatters (black/ruff --fix)
+    "W291",  # Trailing whitespace
+    "W293",  # Blank line contains whitespace
+    
+    # Module docstrings: optional (developers can add as needed)
+    "D100",  # Missing docstring in public module
+    
+    # PEP 8 style exceptions: allow some flexibility
+    "E501",  # Line too long (handled by line-length setting)
+    "W505",  # Doc line too long
+    
+    # Naming: allow underscore-prefixed private vars and common patterns
+    # (These are still checked via N* rules but exceptions configured below)
+    
+    # Type hints: optional (not enforced by ruff by default)
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+]
+
+# Extend ignore with pyupgrade rules to keep pre-3.10 union syntax
+extend-ignore = [
+    # ========================================================================
+    # PYUPGRADE: Keep pre-3.10 union type syntax
+    # ========================================================================
+    # Enforce Optional[X] over X | None, Union[X, Y] over X | Y
+    "UP006",  # Use `list[X]` instead of `List[X]` (DISABLED: keep typing.List)
+    "UP007",  # Use `X | Y` instead of `Union[X, Y]` (DISABLED: keep Union syntax)
+    "UP045",  # Use `X | None` instead of `Optional[X]` (DISABLED: keep Optional)
+]
+
+[lint.pep8-naming]
+# ========================================================================
+# NAMING CONVENTIONS (from .pylintrc [BASIC])
+# ========================================================================
+
+# Allow common single-letter variable names (from good-names in .pylintrc)
+extend-ignore-names = ["i", "j", "k", "ex", "Run", "_", "x", "y", "z"]
+
+# Enforce naming styles for different symbol types
+classmethod-decorators = ["classmethod"]
+staticmethod-decorators = ["staticmethod"]
+
+[lint.isort]
+# ========================================================================
+# IMPORT ORDERING (PEP 8 / isort rules)
+# ========================================================================
+# Ensures imports follow PEP 8 conventions:
+# 1. Standard library
+# 2. Third-party libraries
+# 3. Local application/library
+
+# Force single line imports for cleaner diffs
+force-single-line = false
+
+# Sort imports within sections alphabetically
+force-sort-within-sections = true
+
+# Group imports by their origin
+known-first-party = ["src", "tests"]
+known-third-party = [
+    "fastapi",
+    "uvicorn",
+    "sqlmodel",
+    "pydantic",
+    "pytest",
+]
+
+# Combine as-imports with other imports from the same module
+combine-as-imports = true
+
+# Split imports to prevent long lines
+split-on-trailing-comma = true
+
+[lint.flake8-bugbear]
+# ========================================================================
+# BUGBEAR: CATCH COMMON BUGS AND DESIGN ISSUES
+# ========================================================================
+
+# Extend immutable calls (B008: function call in default value)
+extend-immutable-calls = [
+    "pydantic.Field",
+    "fastapi.Depends",
+    "fastapi.Query",
+    "typer.Option",
+]
+
+[lint.pyupgrade]
+# ========================================================================
+# PYUPGRADE: Control modernization of Python syntax
+# ========================================================================
+# Enforce pre-3.10 union type syntax (Optional[X], Union[X, Y, Z])
+# instead of modernizing to X | None and X | Y | Z
+
+# This option keeps the runtime typing constructs
+keep-runtime-typing = true
+
+[lint.pylint]
+# ========================================================================
+# PYLINT-COMPATIBLE SETTINGS (mapped from .pylintrc [DESIGN])
+# ========================================================================
+# Ruff's pylint plugin provides similar checks to pylint
+
+# Maximum args for a function (from .pylintrc max-args=5)
+max-args = 5
+
+# Maximum branches per function (from .pylintrc max-branches=12)
+max-branches = 12
+
+# Maximum locals per function (from .pylintrc max-locals=15)
+max-locals = 15
+
+# Maximum statements per function (from .pylintrc max-statements=50)
+max-statements = 50
+
+# Maximum return statements per function (from .pylintrc max-returns=6)
+max-returns = 6
+
+# Maximum nested blocks (from .pylintrc max-nested-blocks=5)
+max-nested-blocks = 5
+
+# Maximum public methods per class (from .pylintrc max-public-methods=20)
+max-public-methods = 20
+
+[format]
+# ========================================================================
+# CODE FORMATTING
+# ========================================================================
+# Aligns with .pylintrc [FORMAT] settings
+
+# Use spaces for indentation (not tabs)
+indent-style = "space"
+
+# Normalize line endings (Unix style, matching .pylintrc expected-line-ending-format)
+line-ending = "lf"
+
+# Quote style: double quotes (PEP 8 default)
+quote-style = "double"
+
+# Skip magic trailing comma detection
+skip-magic-trailing-comma = false
+
+[lint.per-file-ignores]
+# ========================================================================
+# PER-FILE EXCEPTIONS
+# ========================================================================
+# Allow unused imports and specific rules in certain files
+
+# Test files: allow unused imports, extra blank lines
+"tests/**" = ["F401", "D", "B008"]
+
+# __init__.py: allow unused imports (for re-exporting in factories)
+"**/__init__.py" = ["F401", "D100"]
+
+# Fixture files: allow long lines in parametrize decorators
+"tests/**/conftest.py" = ["E501"]
