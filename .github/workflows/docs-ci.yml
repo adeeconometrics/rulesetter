@@ -1,0 +1,97 @@
+name: Docs CI
+
+on:
+  push:
+    branches:
+      - release/*
+  pull_request:
+    branches:
+      - release/*
+
+jobs:
+  docs:
+    name: Docs (Sphinx)
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: https://tiezaproject.github.io/TiezAccountingWebApp/
+    outputs:
+      docs_source_exists: ${{ steps.docs_source.outputs.exists }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: false
+
+      - name: Check docs source availability
+        id: docs_source
+        run: |
+          if [[ -f docs/source/conf.py ]] && [[ -f docs/source/index.rst ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Missing docs/source/conf.py or docs/source/index.rst. Skipping docs build for this run."
+          fi
+
+      - name: Install dependencies with uv
+        if: steps.docs_source.outputs.exists == 'true'
+        run: uv sync --python 3.14 --all-extras --group docs --frozen
+
+      - name: Build Sphinx HTML docs
+        if: steps.docs_source.outputs.exists == 'true'
+        run: uv run sphinx-build -b html -W --keep-going docs/source docs/_build/html
+
+      - name: Ensure GitHub Pages static serving
+        if: steps.docs_source.outputs.exists == 'true'
+        run: touch docs/_build/html/.nojekyll
+
+      - name: Upload docs artifacts
+        if: steps.docs_source.outputs.exists == 'true' && github.actor != 'nektos/act'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sphinx-html
+          path: docs/_build/html/
+
+  deploy-docs:
+    name: Deploy Docs (gh-pages)
+    runs-on: ubuntu-latest
+    needs: [docs]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.docs.outputs.docs_source_exists == 'true'
+    steps:
+      - name: Download docs artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: sphinx-html
+          path: docs/_build/html
+
+      - name: Deploy docs
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: docs/_build/html
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [docs, deploy-docs]
+    if: always()
+    steps:
+      - name: Check workflow status
+        run: |
+          if [[ "${{ needs.docs.result }}" == "failure" ]] || \
+             [[ "${{ needs.deploy-docs.result }}" == "failure" ]] || \
+             [[ "${{ needs.deploy-docs.result }}" == "cancelled" ]]; then
+            echo "❌ CI workflow failed"
+            exit 1
+          else
+            echo "✅ All CI checks passed"
+            exit 0
+          fi
