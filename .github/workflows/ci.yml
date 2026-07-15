@@ -1,0 +1,164 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  typecheck:
+    name: Type Check (Python 3.14)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: false
+
+      - name: Install dependencies with uv
+        run: uv sync --python 3.14 --all-extras --frozen
+
+      - name: Run mypy type checker
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            ref_branch="${GITHUB_BASE_REF}"
+          else
+            ref_branch="${GITHUB_REF_NAME}"
+          fi
+
+          mypy_args=()
+          if [ "${ref_branch}" = "main" ] || [ "${ref_branch}" = "master" ]; then
+            mypy_args+=(--strict)
+          fi
+
+          uv run mypy rulesetter/ "${mypy_args[@]}"
+
+  lint:
+    name: Lint (Python 3.14)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: false # Disable cache to avoid permission issues
+
+      - name: Install dependencies with uv
+        # Use frozen mode to prevent generating new lock file in CI
+        run: uv sync --python 3.14 --all-extras --frozen
+
+      - name: Run ruff linter
+        run: uv run ruff check . --statistics
+
+      - name: Run ruff formatter check
+        run: uv run ruff format --check .
+
+  sast:
+    name: SAST Scan (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep SAST scan
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            ref_branch="${GITHUB_BASE_REF}"
+          else
+            ref_branch="${GITHUB_REF_NAME}"
+          fi
+
+          configs=(
+            --config p/security-audit
+            --config p/python
+          )
+
+          if [ "${ref_branch}" = "release" ]; then
+            configs+=(--config p/owasp-top-ten)
+          fi
+
+          semgrep scan "${configs[@]}" --error --sarif --output semgrep-results.sarif .
+
+      - name: Upload SARIF results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-sarif
+          path: semgrep-results.sarif
+
+  test:
+    name: Test (Python 3.14)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: false # Disable cache to avoid permission issues
+
+      - name: Install dependencies with uv
+        # Use frozen mode to prevent generating new lock file in CI
+        run: uv sync --python 3.14 --all-extras --frozen
+
+      - name: Run test and generate report
+        run: uv run pytest test/ --cov=rulesetter --cov-report=term-missing --cov-report=html
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint, sast, test]
+    if: always()
+    steps:
+      - name: Check workflow status
+        run: |
+          if [[ "${{ needs.typecheck.result }}" == "failure" ]] || \
+             [[ "${{ needs.lint.result }}" == "failure" ]] || \  
+             [[ "${{ needs.sast.result }}" == "failure" ]] || \
+             [[ "${{ needs.test.result }}" == "failure" ]]; then
+            echo "❌ CI workflow failed"
+            exit 1
+          else
+            echo "✅ All CI checks passed"
+            exit 0
+          fi
