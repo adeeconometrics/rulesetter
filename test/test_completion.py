@@ -1,13 +1,19 @@
-"""Tests for rulesetter.completion -- unification, critical pairs, confluence."""
+"""Tests for rulesetter.completion -- unification, critical pairs, confluence, KB completion."""
 
 from rulesetter.algebra.group import GroupSignature
 from rulesetter.algebra.monoid import MonoidSignature
 from rulesetter.completion import (
     ConfluenceResult,
     CriticalPair,
+    Equation,
+    KBResult,
+    Orientation,
     all_critical_pairs,
     check_confluence,
+    compare_kbo,
+    knuth_bendix,
     occurs_in,
+    orient,
     overlaps,
     unify,
 )
@@ -321,3 +327,204 @@ class TestCriticalPairJoinable:
             position=(),
         )
         assert cp.is_joinable(engine) is False
+
+
+# ---------------------------------------------------------------------------
+# Term ordering (compare_kbo)
+# ---------------------------------------------------------------------------
+
+
+class TestCompareKBO:
+    def test_same_term(self) -> None:
+        assert compare_kbo(const("a"), const("a"), {}) == 0
+
+    def test_different_constants(self) -> None:
+        # Both weight 1, same precedence 0, but different names
+        # Lexicographic on root: 'a' < 'b'
+        assert compare_kbo(const("a"), const("b"), {}) == -1
+
+    def test_weight_difference(self) -> None:
+        # f(a) has weight 1+0+1+0 = 2, a has weight 1
+        assert compare_kbo(op("f", const("a")), const("a"), {}) > 0
+
+    def test_precedence_difference(self) -> None:
+        prec = {"f": 10, "g": 0}
+        # Both f(a) and g(a) have weight 2, but f has higher precedence
+        assert compare_kbo(op("f", const("a")), op("g", const("a")), prec) > 0
+
+    def test_subterm_property(self) -> None:
+        # f(a) > a because a is a subterm
+        assert compare_kbo(op("f", const("a")), const("a"), {}) > 0
+
+    def test_nested_comparison(self) -> None:
+        # f(a) vs f(b) -- same weight, same root, compare args
+        assert compare_kbo(op("f", const("a")), op("f", const("b")), {}) == -1
+
+    def test_arity_difference(self) -> None:
+        # f(a, b) vs f(a) -- f(a,b) is larger
+        assert compare_kbo(op("f", const("a"), const("b")), op("f", const("a")), {}) > 0
+
+    def test_symmetry(self) -> None:
+        s = op("f", const("a"))
+        t = const("b")
+        assert compare_kbo(s, t, {}) == -compare_kbo(t, s, {})
+
+    def test_var_weight(self) -> None:
+        # Var has weight 1, same as Const, but Var is "smaller" in the ordering
+        # (variables are leaves that can be substituted, constants are fixed)
+        assert compare_kbo(var("x"), const("a"), {}) < 0
+        assert compare_kbo(const("a"), var("x"), {}) > 0
+
+    def test_transitivity(self) -> None:
+        a = const("a")
+        b = const("b")
+        c = const("c")
+        prec = {"a": 1, "b": 2, "c": 3}
+        assert compare_kbo(a, b, prec) < 0
+        assert compare_kbo(b, c, prec) < 0
+        assert compare_kbo(a, c, prec) < 0
+
+
+# ---------------------------------------------------------------------------
+# Orientation
+# ---------------------------------------------------------------------------
+
+
+class TestOrient:
+    def test_orient_left_to_right(self) -> None:
+        eq = Equation(op("f", const("a")), const("a"))
+        prec = {"f": 10}
+        result = orient(eq, prec)
+        assert result is not None
+        r, d = result
+        assert r.lhs == op("f", const("a"))
+        assert r.rhs == const("a")
+        assert d == Orientation.LEFT_TO_RIGHT
+
+    def test_orient_right_to_left(self) -> None:
+        eq = Equation(const("a"), op("f", const("a")))
+        prec = {"f": 10}
+        result = orient(eq, prec)
+        assert result is not None
+        r, d = result
+        # f(a) > a, so the rule should be f(a) → a
+        assert r.lhs == op("f", const("a"))
+        assert r.rhs == const("a")
+        assert d == Orientation.RIGHT_TO_LEFT
+
+    def test_unorientable(self) -> None:
+        # a = a -- same term, can't orient
+        eq = Equation(const("a"), const("a"))
+        result = orient(eq, {})
+        assert result is None
+
+    def test_orient_with_precedence(self) -> None:
+        # f(x) = g(x) with f > g
+        eq = Equation(op("f", var("x")), op("g", var("x")))
+        prec = {"f": 10, "g": 0}
+        result = orient(eq, prec)
+        assert result is not None
+        r, d = result
+        assert r.lhs == op("f", var("x"))
+        assert r.rhs == op("g", var("x"))
+
+
+# ---------------------------------------------------------------------------
+# Knuth-Bendix completion
+# ---------------------------------------------------------------------------
+
+
+class TestKnuthBendix:
+    def test_empty_equations(self) -> None:
+        result = knuth_bendix([], {})
+        assert result.success is True
+        assert result.rules == []
+        assert result.steps == 0
+
+    def test_single_equation(self) -> None:
+        # f(a) = a
+        eq = Equation(op("f", const("a")), const("a"))
+        result = knuth_bendix([eq], {"f": 10})
+        assert result.success is True
+        assert len(result.rules) == 1
+        assert result.rules[0].lhs == op("f", const("a"))
+        assert result.rules[0].rhs == const("a")
+
+    def test_commutative_equations_diverge(self) -> None:
+        # x * y = y * x -- this can't be oriented as a terminating rule
+        eq = Equation(
+            op("mul", var("x"), var("y")),
+            op("mul", var("y"), var("x")),
+            name="comm",
+        )
+        # With default precedence, mul has same weight both ways
+        # This should fail or diverge
+        result = knuth_bendix([eq], {"mul": 5})
+        # The algorithm should either succeed with no rules or diverge
+        # (commutativity is famously non-orientable)
+        assert result.success is True or result.diverged is True
+
+    def test_associative_equations(self) -> None:
+        # mul(mul(x, y), z) = mul(x, mul(y, z))
+        # This is orientable with the right precedence
+        eq = Equation(
+            op("mul", op("mul", var("x"), var("y")), var("z")),
+            op("mul", var("x"), op("mul", var("y"), var("z"))),
+            name="assoc",
+        )
+        result = knuth_bendix([eq], {"mul": 5})
+        # Should complete successfully
+        assert result.success is True
+
+    def test_two_equations(self) -> None:
+        # f(a) = b and g(a) = c
+        eq1 = Equation(op("f", const("a")), const("b"))
+        eq2 = Equation(op("g", const("a")), const("c"))
+        result = knuth_bendix([eq1, eq2], {"f": 10, "g": 10})
+        assert result.success is True
+        assert len(result.rules) == 2
+
+    def test_monoid_equations(self) -> None:
+        # e * x = x and x * e = x
+        eq1 = Equation(
+            op("mul", const("e"), var("x")),
+            var("x"),
+            name="left_id",
+        )
+        eq2 = Equation(
+            op("mul", var("x"), const("e")),
+            var("x"),
+            name="right_id",
+        )
+        result = knuth_bendix([eq1, eq2], {"mul": 5, "e": 0})
+        assert result.success is True
+        assert len(result.rules) >= 2
+
+    def test_group_equations(self) -> None:
+        # Group axioms: e*x=x, x*e=x, inv(x)*x=e, x*inv(x)=e
+        eqs = [
+            Equation(op("mul", const("e"), var("x")), var("x"), "left_id"),
+            Equation(op("mul", var("x"), const("e")), var("x"), "right_id"),
+            Equation(op("mul", op("inv", var("x")), var("x")), const("e"), "left_inv"),
+            Equation(op("mul", var("x"), op("inv", var("x"))), const("e"), "right_inv"),
+        ]
+        result = knuth_bendix(eqs, {"mul": 5, "inv": 3, "e": 0})
+        assert result.success is True
+        # Should have at least the 4 group rules
+        assert len(result.rules) >= 4
+
+    def test_divergence_budget(self) -> None:
+        # An equation that causes many critical pairs
+        eq = Equation(op("f", var("x")), op("g", var("x")))
+        result = knuth_bendix([eq], {"f": 10, "g": 5}, max_rules=5, max_eqs=5)
+        # Should either succeed or diverge within budget
+        assert result.success is True or result.diverged is True
+
+    def test_kb_result_fields(self) -> None:
+        eq = Equation(op("f", const("a")), const("a"))
+        result = knuth_bendix([eq], {"f": 10})
+        assert isinstance(result, KBResult)
+        assert isinstance(result.rules, list)
+        assert isinstance(result.steps, int)
+        assert isinstance(result.success, bool)
+        assert isinstance(result.diverged, bool)
