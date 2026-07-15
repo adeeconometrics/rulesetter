@@ -44,7 +44,7 @@ jobs:
             mypy_args+=(--strict)
           fi
 
-          uv run mypy src/ "${mypy_args[@]}"
+          uv run mypy rulesetter/ "${mypy_args[@]}"
 
   lint:
     name: Lint (Python 3.14)
@@ -136,7 +136,7 @@ jobs:
         run: uv sync --python 3.14 --all-extras --frozen
 
       - name: Run test and generate report
-        run: uv run pytest tests/ --cov=src --cov-report=term-missing --cov-report=html
+        run: uv run pytest test/ --cov=rulesetter --cov-report=term-missing --cov-report=html
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
