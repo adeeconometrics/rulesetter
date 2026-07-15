@@ -1,11 +1,135 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
 from typing import Optional
 
 from rulesetter.engine import RewriteEngine, positions, replace_at
 from rulesetter.rule import Rule, Substitution
 from rulesetter.term import Const, Op, Position, Term, Var
+
+# ---------------------------------------------------------------------------
+# Term ordering (simplified KBO)
+# ---------------------------------------------------------------------------
+
+SymbolPrecedence = dict[str, int]
+"""Mapping from function symbol names to integer precedences.
+Higher = greater.  Symbols not in the mapping default to 0."""
+
+
+def _weight(term: Term, prec: SymbolPrecedence) -> int:
+    """Compute the weight (node count + symbol precedences) of *term*."""
+    if isinstance(term, Var):
+        return 1
+    if isinstance(term, Const):
+        return 1 + prec.get(term.name, 0)
+    if isinstance(term, Op):
+        return 1 + prec.get(term.name, 0) + sum(_weight(a, prec) for a in term.args)
+    raise TypeError(f"unknown term type: {type(term)}")
+
+
+def _lex_compare(a: tuple[int, ...], b: tuple[int, ...]) -> int:
+    """Lexicographic comparison: -1, 0, or 1."""
+    for x, y in zip(a, b, strict=False):
+        if x < y:
+            return -1
+        if x > y:
+            return 1
+    if len(a) < len(b):
+        return -1
+    if len(a) > len(b):
+        return 1
+    return 0
+
+
+def compare_kbo(s: Term, t: Term, prec: SymbolPrecedence) -> int:
+    """Compare terms using a simplified Knuth-Bendix ordering (KBO).
+
+    Returns -1 if s < t, 0 if s == t, 1 if s > t.
+
+    The ordering is:
+    1. Compare by weight (sum of node counts + symbol precedences)
+    2. If equal, compare by root symbol precedence
+    3. If still equal, compare arguments lexicographically
+    4. Subterm property: if t is a subterm of s (and s != t), then s > t
+    """
+    if s == t:
+        return 0
+
+    # Weight comparison
+    ws = _weight(s, prec)
+    wt = _weight(t, prec)
+    if ws < wt:
+        return -1
+    if ws > wt:
+        return 1
+
+    # Same weight: compare root symbol precedence
+    def _root_prec(term: Term) -> int:
+        if isinstance(term, Var):
+            return 0
+        if isinstance(term, Const):
+            return prec.get(term.name, 0)
+        if isinstance(term, Op):
+            return prec.get(term.name, 0)
+        raise TypeError(f"unknown term type: {type(term)}")
+
+    ps = _root_prec(s)
+    pt = _root_prec(t)
+    if ps < pt:
+        return -1
+    if ps > pt:
+        return 1
+
+    # Same precedence: compare by symbol name
+    def _root_name(term: Term) -> str:
+        if isinstance(term, Var):
+            return ""
+        if isinstance(term, Const):
+            return term.name
+        if isinstance(term, Op):
+            return term.name
+        raise TypeError(f"unknown term type: {type(term)}")
+
+    ns = _root_name(s)
+    nt = _root_name(t)
+    if ns < nt:
+        return -1
+    if ns > nt:
+        return 1
+
+    # Same root: compare arguments lexicographically
+    def _args_key(term: Term) -> tuple[int, ...]:
+        if isinstance(term, Var):
+            return ()
+        if isinstance(term, Const):
+            return ()
+        if isinstance(term, Op):
+            return tuple(_weight(a, prec) for a in term.args)
+        raise TypeError(f"unknown term type: {type(term)}")
+
+    cmp = _lex_compare(_args_key(s), _args_key(t))
+    if cmp != 0:
+        return cmp
+
+    # Fall back to structural comparison on arguments
+    def _struct_args(term: Term) -> tuple[Term, ...]:
+        if isinstance(term, Op):
+            return term.args
+        return ()
+
+    sa = _struct_args(s)
+    ta = _struct_args(t)
+    for a, b in zip(sa, ta, strict=False):
+        cmp = compare_kbo(a, b, prec)
+        if cmp != 0:
+            return cmp
+    if len(sa) < len(ta):
+        return -1
+    if len(sa) > len(ta):
+        return 1
+    return 0
+
 
 # ---------------------------------------------------------------------------
 # Unification
@@ -72,6 +196,43 @@ def _unify(s: Term, t: Term, subst: Substitution) -> Optional[Substitution]:
         return current
 
     # Mixed Const/Op or unknown types
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Orientation
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class Equation:
+    """An undirected equation ``lhs = rhs``."""
+
+    lhs: Term
+    rhs: Term
+    name: str = ""
+
+
+class Orientation(Enum):
+    """Result of orienting an equation."""
+
+    LEFT_TO_RIGHT = "ltr"
+    RIGHT_TO_LEFT = "rtl"
+    UNORIENTABLE = "unorientable"
+
+
+def orient(eq: Equation, ordering: SymbolPrecedence) -> tuple[Rule, Orientation] | None:
+    """Orient an equation into a directed rule.
+
+    Returns ``(rule, direction)`` where *direction* indicates which way the
+    equation was oriented.  Returns ``None`` if the equation is unorientable
+    (neither direction is strictly greater in the ordering).
+    """
+    cmp = compare_kbo(eq.lhs, eq.rhs, ordering)
+    if cmp > 0:
+        return Rule(eq.lhs, eq.rhs, name=eq.name), Orientation.LEFT_TO_RIGHT
+    if cmp < 0:
+        return Rule(eq.rhs, eq.lhs, name=eq.name), Orientation.RIGHT_TO_LEFT
     return None
 
 
@@ -186,6 +347,39 @@ def all_critical_pairs(rules: list[Rule]) -> list[CriticalPair]:
 
 
 # ---------------------------------------------------------------------------
+# Simplification helpers
+# ---------------------------------------------------------------------------
+
+
+def _simplify_term(term: Term, rules: list[Rule], max_steps: int = 100) -> Term:
+    """Fully reduce *term* using the given rules."""
+    engine = RewriteEngine(rules=rules, max_steps=max_steps, track_visited=False)
+    return engine.reduce(term)
+
+
+def _simplify_rhs(rule: Rule, rules: list[Rule]) -> Rule:
+    """Simplify the RHS of a rule using all other rules."""
+    new_rhs = _simplify_term(rule.rhs, rules)
+    if new_rhs == rule.rhs:
+        return rule
+    return Rule(rule.lhs, new_rhs, name=rule.name)
+
+
+def _simplify_lhs(rule: Rule, rules: list[Rule]) -> Rule | Equation | None:
+    """Try to simplify the LHS of a rule using other rules.
+
+    If the LHS reduces to a smaller term, returns a new rule.
+    If it reduces but can't be re-oriented, returns an Equation.
+    If it doesn't reduce, returns the original rule.
+    """
+    reduced = _simplify_term(rule.lhs, rules)
+    if reduced == rule.lhs:
+        return rule
+    # LHS was reducible -- this rule is now an equation
+    return Equation(reduced, rule.rhs, name=rule.name)
+
+
+# ---------------------------------------------------------------------------
 # Confluence check
 # ---------------------------------------------------------------------------
 
@@ -241,4 +435,159 @@ def check_confluence(
         is_confluent=len(non_joinable) == 0,
         pairs=pairs,
         non_joinable=non_joinable,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Knuth-Bendix completion
+# ---------------------------------------------------------------------------
+
+# Maximum number of rules before declaring divergence
+_MAX_RULES = 200
+
+# Maximum number of pending equations before declaring divergence
+_MAX_EQS = 200
+
+
+@dataclass
+class KBResult:
+    """Result of a Knuth-Bendix completion attempt.
+
+    *success* is ``True`` if the algorithm converged to a confluent TRS.
+    *rules* is the resulting rule set (may be partial if not successful).
+    *steps* is the number of iterations of the completion loop.
+    *diverged* indicates whether the algorithm ran out of budget.
+    *unorientable* lists equations that could not be oriented.
+    """
+
+    success: bool
+    rules: list[Rule]
+    steps: int
+    diverged: bool = False
+    unorientable: list[Equation] = field(default_factory=list)
+
+
+def knuth_bendix(
+    equations: list[Equation],
+    ordering: SymbolPrecedence,
+    *,
+    max_rules: int = _MAX_RULES,
+    max_eqs: int = _MAX_EQS,
+) -> KBResult:
+    """Run the Knuth-Bendix completion algorithm.
+
+    Given a set of *equations* over a term algebra with signature described
+    by *ordering* (a mapping from symbol names to integer precedences),
+    attempt to construct a confluent and terminating term rewriting system.
+
+    Parameters
+    ----------
+    equations:
+        The initial set of equations to complete.
+    ordering:
+        Symbol precedences for the reduction ordering.
+    max_rules:
+        Maximum number of rules before aborting.
+    max_eqs:
+        Maximum number of pending equations before aborting.
+
+    Returns
+    -------
+    KBResult
+        The completion result.  ``result.success`` is ``True`` if the
+        algorithm converged.
+    """
+    # Phase 1: Orient initial equations
+    rules: list[Rule] = []
+    pending: list[Equation] = list(equations)
+
+    # Orient all initial equations
+    oriented: list[Equation] = []
+    for eq in pending:
+        result = orient(eq, ordering)
+        if result is not None:
+            rule, _dir = result
+            rules.append(rule)
+        else:
+            oriented.append(eq)
+    pending = oriented  # equations that couldn't be oriented
+
+    # Phase 2: Completion loop
+    steps = 0
+    unorientable: list[Equation] = []
+    while pending:
+        steps += 1
+
+        # Budget check
+        if len(rules) > max_rules:
+            return KBResult(success=False, rules=rules, steps=steps, diverged=True)
+        if len(pending) > max_eqs:
+            return KBResult(success=False, rules=rules, steps=steps, diverged=True)
+
+        # Deduce: pick one equation from pending
+        eq = pending.pop(0)
+
+        # Orient the equation
+        result = orient(eq, ordering)
+        if result is None:
+            # Unorientable equation -- track and skip
+            # (In a full KB implementation, we'd use unfailing completion)
+            unorientable.append(eq)
+            continue
+
+        new_rule, _dir = result
+
+        # Simplify the new rule's RHS using existing rules
+        new_rule = _simplify_rhs(new_rule, rules)
+
+        # Simplify existing rules' LHS using the new rule
+        simplified_rules: list[Rule] = []
+        for r in rules:
+            simp = _simplify_lhs(r, [new_rule])
+            if simp is None:
+                # LHS was reducible but can't be re-oriented
+                continue
+            if isinstance(simp, Equation):
+                # LHS reduced to something else -- re-orient
+                re = orient(simp, ordering)
+                if re is not None:
+                    simplified_rules.append(re[0])
+                else:
+                    # Can't re-orient -- skip
+                    continue
+            else:
+                simplified_rules.append(simp)
+
+        rules = simplified_rules
+        rules.append(new_rule)
+
+        # Compute critical pairs between new rule and all existing rules
+        all_rules = list(rules)
+        for r in all_rules:
+            if r is new_rule:
+                continue
+            pairs = overlaps(new_rule, r)
+            for cp in pairs:
+                # Simplify both sides
+                left = _simplify_term(cp.left, rules)
+                right = _simplify_term(cp.right, rules)
+                if left != right:
+                    pending.append(Equation(left, right))
+
+        # Also compute self-overlaps for the new rule
+        self_pairs = overlaps(new_rule, new_rule)
+        for cp in self_pairs:
+            left = _simplify_term(cp.left, rules)
+            right = _simplify_term(cp.right, rules)
+            if left != right:
+                pending.append(Equation(left, right))
+
+    # Phase 3: Verify confluence
+    conf_result = check_confluence(rules)
+
+    return KBResult(
+        success=conf_result.is_confluent,
+        rules=rules,
+        steps=steps,
+        unorientable=unorientable,
     )
