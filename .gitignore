@@ -29,7 +29,9 @@ tests/.pytest_cache/
 htmlcov/
 mock_reports/
 tmp/
-docs/*
+docs/_build/
+docs/_static/
+
 !docs/source/
 !docs/source/**
 !docs/Doxyfile

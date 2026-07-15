@@ -1,0 +1,21 @@
+"""Sphinx configuration for rulesetter."""
+
+project = "rulesetter"
+copyright = "2026, ddamiana"
+author = "ddamiana"
+release = "0.1.0"
+
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+]
+
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+html_theme = "alabaster"
+html_static_path = ["_static"]
+
+autodoc_member_order = "bysource"
+autodoc_typehints = "description"
