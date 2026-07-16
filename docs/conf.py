@@ -1,7 +1,7 @@
 """Sphinx configuration for rulesetter."""
 
 project = "rulesetter"
-copyright = "2026, ddamiana"
+copyright = "2026, ddamiana"  # noqa: A001
 author = "ddamiana"
 release = "0.1.0"
 
