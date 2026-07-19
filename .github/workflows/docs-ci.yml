@@ -49,7 +49,7 @@ jobs:
 
       - name: Install dependencies with uv
         if: steps.docs_source.outputs.exists == 'true'
-        run: uv sync --python 3.14 --all-extras --group docs --frozen
+        run: uv sync --python 3.14 --all-extras --frozen
 
       - name: Build Sphinx HTML docs
         if: steps.docs_source.outputs.exists == 'true'
