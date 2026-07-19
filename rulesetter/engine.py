@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from rulesetter import term as rulesetter_term
 from rulesetter.rule import Rule, Substitution
 from rulesetter.term import Op, Position, Term, pformat
 
@@ -15,7 +16,7 @@ from rulesetter.term import Op, Position, Term, pformat
 class ReductionLimitExceededError(Exception):
     """Raised when the rewrite engine exceeds ``max_steps``."""
 
-    def __init__(self, term: Term, steps: int) -> None:
+    def __init__(self, term: rulesetter_term.Term, steps: int) -> None:
         self.term = term
         self.steps = steps
         super().__init__(f"reduction exceeded {steps} steps; last term: {pformat(term)}")
@@ -24,7 +25,7 @@ class ReductionLimitExceededError(Exception):
 class RewriteCycleDetectedError(Exception):
     """Raised when the rewrite engine detects a cycle (term revisited)."""
 
-    def __init__(self, term: Term) -> None:
+    def __init__(self, term: rulesetter_term.Term) -> None:
         self.term = term
         super().__init__(f"cycle detected; term revisited: {pformat(term)}")
 
