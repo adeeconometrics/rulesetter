@@ -275,11 +275,10 @@ class CriticalPair:
 def overlaps(rule1: Rule, rule2: Rule) -> list[CriticalPair]:
     """Find all critical pairs between *rule1* and *rule2*.
 
-    This includes:
-    1. **Non-trivial overlaps**: a subterm of ``rule1.lhs`` at a non-root
-       position unifies with ``rule2.lhs``.
-    2. **Root overlap**: ``rule1.lhs`` itself unifies with ``rule2.lhs``
-       (only when the two rules are distinct).
+    This includes non-trivial overlaps (a subterm of ``rule1.lhs`` at a
+    non-root position unifies with ``rule2.lhs``) and root overlaps
+    (``rule1.lhs`` itself unifies with ``rule2.lhs``, only when the two
+    rules are distinct).
 
     Each overlap produces a :class:`CriticalPair` with the two divergent
     reducts.
