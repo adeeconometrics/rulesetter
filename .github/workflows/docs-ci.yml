@@ -73,6 +73,9 @@ jobs:
     needs: [docs]
     if: github.event_name == 'push' && needs.docs.outputs.docs_source_exists == 'true'
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download docs artifacts
         uses: actions/download-artifact@v4
         with:
