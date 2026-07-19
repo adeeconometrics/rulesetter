@@ -20,7 +20,7 @@ jobs:
     name: Docs (Sphinx)
     runs-on: ubuntu-latest
     env:
-      SITE_URL: https://tiezaproject.github.io/rulesetter/
+      SITE_URL: https://adeeconometrics.github.io/rulesetter/
     outputs:
       docs_source_exists: ${{ steps.docs_source.outputs.exists }}
     steps:
