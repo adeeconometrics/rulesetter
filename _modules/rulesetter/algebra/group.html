@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>rulesetter.algebra.group &#8212; rulesetter 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for rulesetter.algebra.group</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">rulesetter.algebra.monoid</span><span class="w"> </span><span class="kn">import</span> <span class="n">MonoidSignature</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rulesetter.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewriteEngine</span><span class="p">,</span> <span class="n">Strategy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rulesetter.rule</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rulesetter.term</span><span class="w"> </span><span class="kn">import</span> <span class="n">Const</span><span class="p">,</span> <span class="n">Op</span><span class="p">,</span> <span class="n">Term</span><span class="p">,</span> <span class="n">Var</span><span class="p">,</span> <span class="n">const</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">var</span>
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Group signature</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="GroupSignature">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GroupSignature</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The theory of groups: a monoid with inverses.</span>
+
+<span class="sd">    **Operations**</span>
+
+<span class="sd">    * ``e`` -- identity element (constant)</span>
+<span class="sd">    * ``mul(x, y)`` -- binary multiplication (associative)</span>
+<span class="sd">    * ``inv(x)`` -- multiplicative inverse</span>
+
+<span class="sd">    **Axioms (oriented as rewrite rules)**</span>
+
+<span class="sd">    * ``mul(e, x) → x``          (left identity)</span>
+<span class="sd">    * ``mul(x, e) → x``          (right identity)</span>
+<span class="sd">    * ``mul(inv(x), x) → e``     (left inverse)</span>
+<span class="sd">    * ``mul(x, inv(x)) → e``     (right inverse)</span>
+
+<span class="sd">    Associativity is not included by default (same rationale as</span>
+<span class="sd">    :class:`MonoidSignature`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">identity_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;e&quot;</span>
+    <span class="n">mul_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mul&quot;</span>
+    <span class="n">inv_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;inv&quot;</span>
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Term constructors</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">e</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Const</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The identity constant.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">const</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identity_name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GroupSignature.mul">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature.mul">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Term</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Term</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Op</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build ``mul(x, y)``.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mul_name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GroupSignature.inv">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature.inv">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Term</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Op</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build ``inv(x)``.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inv_name</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GroupSignature.var">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature.var">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Var</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience: create a variable.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">var</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Rewrite rules</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="GroupSignature.rules">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature.rules">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rules</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Rule</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the standard group rewrite rules.</span>
+
+<span class="sd">        * ``mul(e, x) → x``          (left identity)</span>
+<span class="sd">        * ``mul(x, e) → x``          (right identity)</span>
+<span class="sd">        * ``mul(inv(x), x) → e``     (left inverse)</span>
+<span class="sd">        * ``mul(x, inv(x)) → e``     (right inverse)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;left_id&quot;</span><span class="p">),</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;right_id&quot;</span><span class="p">),</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;left_inv&quot;</span><span class="p">),</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;right_inv&quot;</span><span class="p">),</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="GroupSignature.with_associativity">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature.with_associativity">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_associativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Rule</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return rules including an oriented associativity law.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        direction:</span>
+<span class="sd">            ``&quot;left&quot;``  → ``mul(mul(x,y),z) → mul(x,mul(y,z))``</span>
+<span class="sd">            ``&quot;right&quot;`` → ``mul(x,mul(y,z)) → mul(mul(x,y),z)``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span>
+        <span class="n">lhs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+            <span class="n">assoc</span> <span class="o">=</span> <span class="n">Rule</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;assoc_left&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
+            <span class="n">assoc</span> <span class="o">=</span> <span class="n">Rule</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;assoc_right&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;direction must be &#39;left&#39; or &#39;right&#39;, got </span><span class="si">{</span><span class="n">direction</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="n">assoc</span><span class="p">]</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Engine factory</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="GroupSignature.engine">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature.engine">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">engine</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">include_associativity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">assoc_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span>
+        <span class="n">strategy</span><span class="p">:</span> <span class="n">Strategy</span> <span class="o">=</span> <span class="n">Strategy</span><span class="o">.</span><span class="n">INNERMOST</span><span class="p">,</span>
+        <span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="n">track_visited</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RewriteEngine</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a :class:`RewriteEngine` pre-loaded with group rules.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">include_associativity</span><span class="p">:</span>
+            <span class="n">rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_associativity</span><span class="p">(</span><span class="n">assoc_direction</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">RewriteEngine</span><span class="p">(</span>
+            <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
+            <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">,</span>
+            <span class="n">max_steps</span><span class="o">=</span><span class="n">max_steps</span><span class="p">,</span>
+            <span class="n">track_visited</span><span class="o">=</span><span class="n">track_visited</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Convenience: lift monoid terms</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="GroupSignature.to_monoid">
+<a class="viewcode-back" href="../../../rulesetter.algebra.html#rulesetter.algebra.GroupSignature.to_monoid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_monoid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MonoidSignature</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the underlying :class:`MonoidSignature`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MonoidSignature</span><span class="p">(</span>
+            <span class="n">identity_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">identity_name</span><span class="p">,</span>
+            <span class="n">mul_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mul_name</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">rulesetter</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">rulesetter</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, ddamiana.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

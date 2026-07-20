@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>rulesetter.algebra package &#8212; rulesetter 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="rulesetter package" href="rulesetter.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-rulesetter.algebra">
+<span id="rulesetter-algebra-package"></span><h1>rulesetter.algebra package<a class="headerlink" href="#module-rulesetter.algebra" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rulesetter.algebra.</span></span><span class="sig-name descname"><span class="pre">MonoidSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identity_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'e'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mul_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mul'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.MonoidSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The theory of monoids: a set with an associative binary operation and
+an identity element.</p>
+<p><strong>Operations</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">e</span></code> – identity element (constant)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code> – binary multiplication (associative)</p></li>
+</ul>
+<p><strong>Axioms (oriented as rewrite rules)</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (right identity)</p></li>
+</ul>
+<p>Associativity <code class="docutils literal notranslate"><span class="pre">mul(mul(x,y),z)</span> <span class="pre">=</span> <span class="pre">mul(x,mul(y,z))</span></code> is <em>not</em> included
+as a rewrite rule by default because it interacts badly with the other
+rules and can cause non-termination.  Use
+<a class="reference internal" href="#rulesetter.algebra.MonoidSignature.with_associativity" title="rulesetter.algebra.MonoidSignature.with_associativity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">with_associativity()</span></code></a> to add it in either orientation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identity_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>mul_name</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.identity_name">
+<span class="sig-name descname"><span class="pre">identity_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.identity_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.mul_name">
+<span class="sig-name descname"><span class="pre">mul_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.mul_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.e">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">e</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rulesetter.html#rulesetter.term.Const" title="rulesetter.term.Const"><span class="pre">Const</span></a></span><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.e" title="Link to this definition">¶</a></dt>
+<dd><p>The identity constant.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.mul">
+<span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.mul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.mul" title="Link to this definition">¶</a></dt>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+<li><p><strong>y</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Op" title="rulesetter.term.Op"><em>Op</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.var">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.var" title="Link to this definition">¶</a></dt>
+<dd><p>Convenience: create a variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Var" title="rulesetter.term.Var"><em>Var</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.rules">
+<span class="sig-name descname"><span class="pre">rules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.rules" title="Link to this definition">¶</a></dt>
+<dd><p>Return the standard monoid rewrite rules (without associativity).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (right identity)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.with_associativity">
+<span class="sig-name descname"><span class="pre">with_associativity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.with_associativity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.with_associativity" title="Link to this definition">¶</a></dt>
+<dd><p>Return rules including an oriented associativity law.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;left&quot;</span></code>  → <code class="docutils literal notranslate"><span class="pre">mul(mul(x,y),z)</span> <span class="pre">→</span> <span class="pre">mul(x,mul(y,z))</span></code> (flatten left)
+<code class="docutils literal notranslate"><span class="pre">&quot;right&quot;</span></code> → <code class="docutils literal notranslate"><span class="pre">mul(x,mul(y,z))</span> <span class="pre">→</span> <span class="pre">mul(mul(x,y),z)</span></code> (flatten right)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.MonoidSignature.engine">
+<span class="sig-name descname"><span class="pre">engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_associativity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assoc_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Strategy.INNERMOST</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_visited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.MonoidSignature.engine" title="Link to this definition">¶</a></dt>
+<dd><p>Build a <code class="xref py py-class docutils literal notranslate"><span class="pre">RewriteEngine</span></code> pre-loaded with monoid rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include_associativity</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, add the associativity rule.</p></li>
+<li><p><strong>assoc_direction</strong> (<em>str</em>) – Orientation for the associativity rule (<code class="docutils literal notranslate"><span class="pre">&quot;left&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;right&quot;</span></code>).</p></li>
+<li><p><strong>strategy</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.engine.Strategy" title="rulesetter.engine.Strategy"><em>Strategy</em></a>) – Rewrite strategy.</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em>) – Maximum rewrite steps before raising.</p></li>
+<li><p><strong>track_visited</strong> (<em>bool</em>) – Enable cycle detection.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.engine.RewriteEngine" title="rulesetter.engine.RewriteEngine"><em>RewriteEngine</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rulesetter.algebra.</span></span><span class="sig-name descname"><span class="pre">GroupSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identity_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'e'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mul_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mul'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The theory of groups: a monoid with inverses.</p>
+<p><strong>Operations</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">e</span></code> – identity element (constant)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code> – binary multiplication (associative)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inv(x)</span></code> – multiplicative inverse</p></li>
+</ul>
+<p><strong>Axioms (oriented as rewrite rules)</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (right identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(inv(x),</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">e</span></code>     (left inverse)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">inv(x))</span> <span class="pre">→</span> <span class="pre">e</span></code>     (right inverse)</p></li>
+</ul>
+<p>Associativity is not included by default (same rationale as
+<a class="reference internal" href="#rulesetter.algebra.MonoidSignature" title="rulesetter.algebra.MonoidSignature"><code class="xref py py-class docutils literal notranslate"><span class="pre">MonoidSignature</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identity_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>mul_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>inv_name</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.identity_name">
+<span class="sig-name descname"><span class="pre">identity_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.GroupSignature.identity_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.mul_name">
+<span class="sig-name descname"><span class="pre">mul_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.GroupSignature.mul_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.inv_name">
+<span class="sig-name descname"><span class="pre">inv_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.GroupSignature.inv_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.e">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">e</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rulesetter.html#rulesetter.term.Const" title="rulesetter.term.Const"><span class="pre">Const</span></a></span><a class="headerlink" href="#rulesetter.algebra.GroupSignature.e" title="Link to this definition">¶</a></dt>
+<dd><p>The identity constant.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.mul">
+<span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.mul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature.mul" title="Link to this definition">¶</a></dt>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+<li><p><strong>y</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Op" title="rulesetter.term.Op"><em>Op</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.inv">
+<span class="sig-name descname"><span class="pre">inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature.inv" title="Link to this definition">¶</a></dt>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">inv(x)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Op" title="rulesetter.term.Op"><em>Op</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.var">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature.var" title="Link to this definition">¶</a></dt>
+<dd><p>Convenience: create a variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Var" title="rulesetter.term.Var"><em>Var</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.rules">
+<span class="sig-name descname"><span class="pre">rules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature.rules" title="Link to this definition">¶</a></dt>
+<dd><p>Return the standard group rewrite rules.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (right identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(inv(x),</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">e</span></code>     (left inverse)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">inv(x))</span> <span class="pre">→</span> <span class="pre">e</span></code>     (right inverse)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.with_associativity">
+<span class="sig-name descname"><span class="pre">with_associativity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.with_associativity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature.with_associativity" title="Link to this definition">¶</a></dt>
+<dd><p>Return rules including an oriented associativity law.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;left&quot;</span></code>  → <code class="docutils literal notranslate"><span class="pre">mul(mul(x,y),z)</span> <span class="pre">→</span> <span class="pre">mul(x,mul(y,z))</span></code>
+<code class="docutils literal notranslate"><span class="pre">&quot;right&quot;</span></code> → <code class="docutils literal notranslate"><span class="pre">mul(x,mul(y,z))</span> <span class="pre">→</span> <span class="pre">mul(mul(x,y),z)</span></code></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.engine">
+<span class="sig-name descname"><span class="pre">engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_associativity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assoc_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Strategy.INNERMOST</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_visited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature.engine" title="Link to this definition">¶</a></dt>
+<dd><p>Build a <code class="xref py py-class docutils literal notranslate"><span class="pre">RewriteEngine</span></code> pre-loaded with group rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include_associativity</strong> (<em>bool</em>)</p></li>
+<li><p><strong>assoc_direction</strong> (<em>str</em>)</p></li>
+<li><p><strong>strategy</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.engine.Strategy" title="rulesetter.engine.Strategy"><em>Strategy</em></a>)</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em>)</p></li>
+<li><p><strong>track_visited</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.engine.RewriteEngine" title="rulesetter.engine.RewriteEngine"><em>RewriteEngine</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.GroupSignature.to_monoid">
+<span class="sig-name descname"><span class="pre">to_monoid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.to_monoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.GroupSignature.to_monoid" title="Link to this definition">¶</a></dt>
+<dd><p>Return the underlying <a class="reference internal" href="#rulesetter.algebra.MonoidSignature" title="rulesetter.algebra.MonoidSignature"><code class="xref py py-class docutils literal notranslate"><span class="pre">MonoidSignature</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rulesetter.algebra.monoid.MonoidSignature" title="rulesetter.algebra.monoid.MonoidSignature"><em>MonoidSignature</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="module-rulesetter.algebra.monoid">
+<span id="rulesetter-algebra-monoid"></span><h2>rulesetter.algebra.monoid<a class="headerlink" href="#module-rulesetter.algebra.monoid" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rulesetter.algebra.monoid.</span></span><span class="sig-name descname"><span class="pre">MonoidSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identity_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'e'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mul_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mul'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The theory of monoids: a set with an associative binary operation and
+an identity element.</p>
+<p><strong>Operations</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">e</span></code> – identity element (constant)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code> – binary multiplication (associative)</p></li>
+</ul>
+<p><strong>Axioms (oriented as rewrite rules)</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (right identity)</p></li>
+</ul>
+<p>Associativity <code class="docutils literal notranslate"><span class="pre">mul(mul(x,y),z)</span> <span class="pre">=</span> <span class="pre">mul(x,mul(y,z))</span></code> is <em>not</em> included
+as a rewrite rule by default because it interacts badly with the other
+rules and can cause non-termination.  Use
+<a class="reference internal" href="#rulesetter.algebra.monoid.MonoidSignature.with_associativity" title="rulesetter.algebra.monoid.MonoidSignature.with_associativity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">with_associativity()</span></code></a> to add it in either orientation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identity_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>mul_name</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.identity_name">
+<span class="sig-name descname"><span class="pre">identity_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.identity_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.mul_name">
+<span class="sig-name descname"><span class="pre">mul_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.mul_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.e">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">e</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rulesetter.html#rulesetter.term.Const" title="rulesetter.term.Const"><span class="pre">Const</span></a></span><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.e" title="Link to this definition">¶</a></dt>
+<dd><p>The identity constant.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.mul">
+<span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.mul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.mul" title="Link to this definition">¶</a></dt>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+<li><p><strong>y</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Op" title="rulesetter.term.Op"><em>Op</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.var">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.var" title="Link to this definition">¶</a></dt>
+<dd><p>Convenience: create a variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Var" title="rulesetter.term.Var"><em>Var</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.rules">
+<span class="sig-name descname"><span class="pre">rules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.rules" title="Link to this definition">¶</a></dt>
+<dd><p>Return the standard monoid rewrite rules (without associativity).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>  (right identity)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.with_associativity">
+<span class="sig-name descname"><span class="pre">with_associativity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.with_associativity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.with_associativity" title="Link to this definition">¶</a></dt>
+<dd><p>Return rules including an oriented associativity law.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;left&quot;</span></code>  → <code class="docutils literal notranslate"><span class="pre">mul(mul(x,y),z)</span> <span class="pre">→</span> <span class="pre">mul(x,mul(y,z))</span></code> (flatten left)
+<code class="docutils literal notranslate"><span class="pre">&quot;right&quot;</span></code> → <code class="docutils literal notranslate"><span class="pre">mul(x,mul(y,z))</span> <span class="pre">→</span> <span class="pre">mul(mul(x,y),z)</span></code> (flatten right)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.monoid.MonoidSignature.engine">
+<span class="sig-name descname"><span class="pre">engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_associativity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assoc_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Strategy.INNERMOST</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_visited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/monoid.html#MonoidSignature.engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.monoid.MonoidSignature.engine" title="Link to this definition">¶</a></dt>
+<dd><p>Build a <code class="xref py py-class docutils literal notranslate"><span class="pre">RewriteEngine</span></code> pre-loaded with monoid rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include_associativity</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, add the associativity rule.</p></li>
+<li><p><strong>assoc_direction</strong> (<em>str</em>) – Orientation for the associativity rule (<code class="docutils literal notranslate"><span class="pre">&quot;left&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;right&quot;</span></code>).</p></li>
+<li><p><strong>strategy</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.engine.Strategy" title="rulesetter.engine.Strategy"><em>Strategy</em></a>) – Rewrite strategy.</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em>) – Maximum rewrite steps before raising.</p></li>
+<li><p><strong>track_visited</strong> (<em>bool</em>) – Enable cycle detection.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.engine.RewriteEngine" title="rulesetter.engine.RewriteEngine"><em>RewriteEngine</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rulesetter.algebra.group">
+<span id="rulesetter-algebra-group"></span><h2>rulesetter.algebra.group<a class="headerlink" href="#module-rulesetter.algebra.group" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rulesetter.algebra.group.</span></span><span class="sig-name descname"><span class="pre">GroupSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identity_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'e'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mul_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mul'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The theory of groups: a monoid with inverses.</p>
+<p><strong>Operations</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">e</span></code> – identity element (constant)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code> – binary multiplication (associative)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inv(x)</span></code> – multiplicative inverse</p></li>
+</ul>
+<p><strong>Axioms (oriented as rewrite rules)</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (right identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(inv(x),</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">e</span></code>     (left inverse)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">inv(x))</span> <span class="pre">→</span> <span class="pre">e</span></code>     (right inverse)</p></li>
+</ul>
+<p>Associativity is not included by default (same rationale as
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MonoidSignature</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identity_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>mul_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>inv_name</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.identity_name">
+<span class="sig-name descname"><span class="pre">identity_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.identity_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.mul_name">
+<span class="sig-name descname"><span class="pre">mul_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.mul_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.inv_name">
+<span class="sig-name descname"><span class="pre">inv_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.inv_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.e">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">e</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rulesetter.html#rulesetter.term.Const" title="rulesetter.term.Const"><span class="pre">Const</span></a></span><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.e" title="Link to this definition">¶</a></dt>
+<dd><p>The identity constant.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.mul">
+<span class="sig-name descname"><span class="pre">mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.mul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.mul" title="Link to this definition">¶</a></dt>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">y)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+<li><p><strong>y</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Op" title="rulesetter.term.Op"><em>Op</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.inv">
+<span class="sig-name descname"><span class="pre">inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.inv" title="Link to this definition">¶</a></dt>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">inv(x)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.term.Term" title="rulesetter.term.Term"><em>Term</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Op" title="rulesetter.term.Op"><em>Op</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.var">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.var" title="Link to this definition">¶</a></dt>
+<dd><p>Convenience: create a variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.term.Var" title="rulesetter.term.Var"><em>Var</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.rules">
+<span class="sig-name descname"><span class="pre">rules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.rules" title="Link to this definition">¶</a></dt>
+<dd><p>Return the standard group rewrite rules.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(e,</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (left identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">e)</span> <span class="pre">→</span> <span class="pre">x</span></code>          (right identity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(inv(x),</span> <span class="pre">x)</span> <span class="pre">→</span> <span class="pre">e</span></code>     (left inverse)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mul(x,</span> <span class="pre">inv(x))</span> <span class="pre">→</span> <span class="pre">e</span></code>     (right inverse)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.with_associativity">
+<span class="sig-name descname"><span class="pre">with_associativity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.with_associativity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.with_associativity" title="Link to this definition">¶</a></dt>
+<dd><p>Return rules including an oriented associativity law.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;left&quot;</span></code>  → <code class="docutils literal notranslate"><span class="pre">mul(mul(x,y),z)</span> <span class="pre">→</span> <span class="pre">mul(x,mul(y,z))</span></code>
+<code class="docutils literal notranslate"><span class="pre">&quot;right&quot;</span></code> → <code class="docutils literal notranslate"><span class="pre">mul(x,mul(y,z))</span> <span class="pre">→</span> <span class="pre">mul(mul(x,y),z)</span></code></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="rulesetter.html#rulesetter.rule.Rule" title="rulesetter.rule.Rule"><em>Rule</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.engine">
+<span class="sig-name descname"><span class="pre">engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_associativity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assoc_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Strategy.INNERMOST</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_visited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.engine" title="Link to this definition">¶</a></dt>
+<dd><p>Build a <code class="xref py py-class docutils literal notranslate"><span class="pre">RewriteEngine</span></code> pre-loaded with group rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include_associativity</strong> (<em>bool</em>)</p></li>
+<li><p><strong>assoc_direction</strong> (<em>str</em>)</p></li>
+<li><p><strong>strategy</strong> (<a class="reference internal" href="rulesetter.html#rulesetter.engine.Strategy" title="rulesetter.engine.Strategy"><em>Strategy</em></a>)</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em>)</p></li>
+<li><p><strong>track_visited</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rulesetter.html#rulesetter.engine.RewriteEngine" title="rulesetter.engine.RewriteEngine"><em>RewriteEngine</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rulesetter.algebra.group.GroupSignature.to_monoid">
+<span class="sig-name descname"><span class="pre">to_monoid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rulesetter/algebra/group.html#GroupSignature.to_monoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rulesetter.algebra.group.GroupSignature.to_monoid" title="Link to this definition">¶</a></dt>
+<dd><p>Return the underlying <code class="xref py py-class docutils literal notranslate"><span class="pre">MonoidSignature</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rulesetter.algebra.monoid.MonoidSignature" title="rulesetter.algebra.monoid.MonoidSignature"><em>MonoidSignature</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">rulesetter</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">rulesetter</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="rulesetter.html">rulesetter package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">rulesetter.algebra package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">rulesetter</a><ul>
+      <li>Previous: <a href="rulesetter.html" title="previous chapter">rulesetter package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, ddamiana.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/rulesetter.algebra.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
