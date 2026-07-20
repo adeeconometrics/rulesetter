@@ -82,6 +82,9 @@ jobs:
           name: sphinx-html
           path: docs/_build/html
 
+      - name: Ensure GitHub Pages static serving
+        run: touch docs/_build/html/.nojekyll
+
       - name: Deploy docs
         uses: JamesIves/github-pages-deploy-action@v4
         with:
